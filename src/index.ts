@@ -1,12 +1,22 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import { handleGitHubIssue } from './workflow';
+import crypto from 'crypto';
 
 const app = express();
 const PORT: number = 3000;
 
 // Middleware to parse JSON payloads
-app.use(express.json());
+app.use(express.json({ verify: (req: any, res, buf) => { req.rawBody = buf; } }));
+
+function verifyGitHubSignature(req: Request): boolean {
+  const signature = req.headers['x-hub-signature-256'] as string;
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+  if (!signature || !secret) return false;
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = 'sha256=' + hmac.update((req as any).rawBody).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+}
 
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
@@ -15,6 +25,9 @@ app.get('/', (req: Request, res: Response) => {
 
 // GitHub webhook endpoint
 app.post('/webhook/github', (req: Request, res: Response) => {
+  if (!verifyGitHubSignature(req)) {
+    return res.status(401).json({ status: 'error', message: 'Invalid signature' });
+  }
   try {
     console.log('=== GitHub Webhook Received ===');
     console.log('Headers:', req.headers);
