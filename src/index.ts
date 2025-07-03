@@ -23,6 +23,130 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Hello World');
 });
 
+// GitHub capabilities discovery endpoint
+app.get('/resources/github-capabilities', (req: Request, res: Response) => {
+  res.json({
+    service: 'GitHub',
+    description: 'GitHub API integration for issue management and repository operations',
+    tools: [
+      {
+        name: 'createIssueComment',
+        description: 'Creates a comment on a GitHub issue',
+        parameters: ['owner', 'repo', 'issue_number', 'body'],
+        parameterTypes: {
+          owner: 'string',
+          repo: 'string', 
+          issue_number: 'number',
+          body: 'string'
+        }
+      },
+      {
+        name: 'getIssue',
+        description: 'Retrieves details of a specific GitHub issue',
+        parameters: ['owner', 'repo', 'issue_number'],
+        parameterTypes: {
+          owner: 'string',
+          repo: 'string',
+          issue_number: 'number'
+        }
+      },
+      {
+        name: 'listIssues',
+        description: 'Lists issues in a repository with optional filtering',
+        parameters: ['owner', 'repo', 'state', 'per_page'],
+        parameterTypes: {
+          owner: 'string',
+          repo: 'string',
+          state: 'string (open|closed|all)',
+          per_page: 'number (max 100)'
+        }
+      }
+    ]
+  });
+});
+
+// Notion capabilities discovery endpoint
+app.get('/resources/notion-capabilities', (req: Request, res: Response) => {
+  res.json({
+    service: 'Notion',
+    description: 'Notion API integration for database operations and task management',
+    tools: [
+      {
+        name: 'createTaskInNotion',
+        description: 'Creates a new task/page in a Notion database',
+        parameters: ['title', 'content'],
+        parameterTypes: {
+          title: 'string',
+          content: 'string'
+        }
+      },
+      {
+        name: 'getPage',
+        description: 'Retrieves details of a specific Notion page',
+        parameters: ['pageId'],
+        parameterTypes: {
+          pageId: 'string'
+        }
+      },
+      {
+        name: 'getDatabase',
+        description: 'Retrieves the structure and properties of the configured Notion database',
+        parameters: [],
+        parameterTypes: {}
+      },
+      {
+        name: 'queryDatabase',
+        description: 'Queries the Notion database with optional filters and sorting',
+        parameters: ['filter', 'sorts'],
+        parameterTypes: {
+          filter: 'object (optional)',
+          sorts: 'array (optional)'
+        }
+      }
+    ]
+  });
+});
+
+// Google Docs capabilities discovery endpoint
+app.get('/resources/google-docs-capabilities', (req: Request, res: Response) => {
+  res.json({
+    service: 'Google Docs',
+    description: 'Google Docs API integration for document operations (placeholder for future implementation)',
+    tools: [
+      {
+        name: 'createDocument',
+        description: 'Creates a new Google Doc (not yet implemented)',
+        parameters: ['title', 'content'],
+        parameterTypes: {
+          title: 'string',
+          content: 'string'
+        },
+        status: 'planned'
+      },
+      {
+        name: 'updateDocument',
+        description: 'Updates content in an existing Google Doc (not yet implemented)',
+        parameters: ['documentId', 'content'],
+        parameterTypes: {
+          documentId: 'string',
+          content: 'string'
+        },
+        status: 'planned'
+      },
+      {
+        name: 'getDocument',
+        description: 'Retrieves content from a Google Doc (not yet implemented)',
+        parameters: ['documentId'],
+        parameterTypes: {
+          documentId: 'string'
+        },
+        status: 'planned'
+      }
+    ],
+    note: 'Google Docs integration is planned for future implementation'
+  });
+});
+
 // GitHub webhook endpoint
 app.post('/webhook/github', (req: Request, res: Response) => {
   if (!verifyGitHubSignature(req)) {
