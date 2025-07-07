@@ -13,8 +13,13 @@ function verifyGitHubSignature(req: Request): boolean {
   const signature = req.headers['x-hub-signature-256'] as string;
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
   if (!signature || !secret) return false;
+  
   const hmac = crypto.createHmac('sha256', secret);
   const digest = 'sha256=' + hmac.update((req as any).rawBody).digest('hex');
+  
+  // Ensure both strings have the same length before comparison
+  if (signature.length !== digest.length) return false;
+  
   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
 }
 
